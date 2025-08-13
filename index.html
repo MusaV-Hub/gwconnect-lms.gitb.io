@@ -776,6 +776,10 @@
                             <input type="email" id="registerEmail" required placeholder="Enter your email">
                         </div>
                         <div class="form-group">
+                            <label>ID Number</label>
+                            <input type="text" id="registerIdNumber" required placeholder="Enter your ID number">
+                        </div>
+                        <div class="form-group">
                             <label>Password</label>
                             <input type="password" id="registerPassword" required placeholder="Create a password">
                         </div>
@@ -811,6 +815,14 @@
                                 <option value="Procurement">Procurement</option>
                                 <option value="Other">Other</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Course Name</label>
+                            <input type="text" id="registerCourseName" placeholder="Enter your course name">
+                        </div>
+                        <div class="form-group">
+                            <label>Host Company</label>
+                            <input type="text" id="registerHostCompany" placeholder="Enter your host company">
                         </div>
                         <div class="form-group">
                             <label>Profile Picture (Optional)</label>
@@ -972,7 +984,7 @@
                                 <div class="action-buttons">
                                     <button class="btn btn-success btn-small" onclick="openAddLearnerModal()">➕ Add Learner</button>
                                     <button class="btn btn-secondary btn-small" onclick="openImportLearnersModal()">📥 Import Learners</button>
-                                    <button class="btn btn-warning btn-small" onclick="exportLearnerData()">📤 Export Data</button>
+                                    <button class="btn btn-warning btn-small" onclick="showExportOptions()">📤 Export Data</button>
                                     <button class="btn btn-secondary btn-small" onclick="sendBulkNotifications()">📧 Send Notifications</button>
                                 </div>
                             </div>
@@ -1047,9 +1059,9 @@
                             <div class="quick-actions">
                                 <h3>Reports & Analytics</h3>
                                 <div class="action-buttons">
-                                    <button class="btn btn-success btn-small" onclick="generateProgressReport()">📊 Progress Report</button>
-                                    <button class="btn btn-secondary btn-small" onclick="generateEngagementReport()">📈 Engagement Report</button>
-                                    <button class="btn btn-warning btn-small" onclick="generateCompletionReport()">🎯 Completion Report</button>
+                                    <button class="btn btn-success btn-small" onclick="showReportExportOptions('progress')">📊 Progress Report</button>
+                                    <button class="btn btn-secondary btn-small" onclick="showReportExportOptions('engagement')">📈 Engagement Report</button>
+                                    <button class="btn btn-warning btn-small" onclick="showReportExportOptions('completion')">🎯 Completion Report</button>
                                     <button class="btn btn-secondary btn-small" onclick="generateCustomReport()">📋 Custom Report</button>
                                 </div>
                             </div>
@@ -1090,26 +1102,42 @@
                         <input type="email" id="profileEmail" required>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Department</label>
-                    <select id="profileDepartment">
-                        <option value="">Select your department</option>
-                        <option value="Information Technology">Information Technology</option>
-                        <option value="Human Resources">Human Resources</option>
-                        <option value="Finance & Accounting">Finance & Accounting</option>
-                        <option value="Marketing & Communications">Marketing & Communications</option>
-                        <option value="Operations & Logistics">Operations & Logistics</option>
-                        <option value="Sales & Business Development">Sales & Business Development</option>
-                        <option value="Customer Service">Customer Service</option>
-                        <option value="Research & Development">Research & Development</option>
-                        <option value="Quality Assurance">Quality Assurance</option>
-                        <option value="Legal & Compliance">Legal & Compliance</option>
-                        <option value="Administration">Administration</option>
-                        <option value="Project Management">Project Management</option>
-                        <option value="Training & Development">Training & Development</option>
-                        <option value="Procurement">Procurement</option>
-                        <option value="Other">Other</option>
-                    </select>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ID Number</label>
+                        <input type="text" id="profileIdNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Department</label>
+                        <select id="profileDepartment">
+                            <option value="">Select your department</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Human Resources">Human Resources</option>
+                            <option value="Finance & Accounting">Finance & Accounting</option>
+                            <option value="Marketing & Communications">Marketing & Communications</option>
+                            <option value="Operations & Logistics">Operations & Logistics</option>
+                            <option value="Sales & Business Development">Sales & Business Development</option>
+                            <option value="Customer Service">Customer Service</option>
+                            <option value="Research & Development">Research & Development</option>
+                            <option value="Quality Assurance">Quality Assurance</option>
+                            <option value="Legal & Compliance">Legal & Compliance</option>
+                            <option value="Administration">Administration</option>
+                            <option value="Project Management">Project Management</option>
+                            <option value="Training & Development">Training & Development</option>
+                            <option value="Procurement">Procurement</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Course Name</label>
+                        <input type="text" id="profileCourseName">
+                    </div>
+                    <div class="form-group">
+                        <label>Host Company</label>
+                        <input type="text" id="profileHostCompany">
+                    </div>
                 </div>
                 <button type="submit" class="btn">Update Profile</button>
             </form>
@@ -1175,12 +1203,17 @@
                 <button class="close-btn" onclick="closeModal('importLearnersModal')">&times;</button>
             </div>
             <div class="form-group">
-                <label>Upload CSV File</label>
+                <label>Upload CSV/Excel File</label>
+                <div style="margin-bottom: 15px;">
+                    <button type="button" class="btn btn-success btn-small" onclick="downloadImportTemplate()">
+                        📥 Download Excel Template
+                    </button>
+                </div>
                 <div class="file-input-wrapper">
-                    <input type="file" id="importFile" accept=".csv" onchange="previewImportFile(this)">
+                    <input type="file" id="importFile" accept=".csv,.xlsx,.xls" onchange="previewImportFile(this)">
                     <div id="importPreview">
-                        📄 Click to upload CSV file<br>
-                        <small>Format: Name, Email, Department, Role</small>
+                        📄 Click to upload CSV or Excel file<br>
+                        <small>Supported formats: CSV, Excel (.xlsx, .xls)</small>
                     </div>
                 </div>
             </div>
@@ -1212,6 +1245,10 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
+                        <label>ID Number</label>
+                        <input type="text" id="learnerIdNumber" required placeholder="Enter ID number">
+                    </div>
+                    <div class="form-group">
                         <label>Department</label>
                         <select id="learnerDepartment">
                             <option value="">Select department</option>
@@ -1232,6 +1269,18 @@
                             <option value="Other">Other</option>
                         </select>
                     </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Course Name</label>
+                        <input type="text" id="learnerCourseName" placeholder="Enter course name">
+                    </div>
+                    <div class="form-group">
+                        <label>Host Company</label>
+                        <input type="text" id="learnerHostCompany" placeholder="Enter host company">
+                    </div>
+                </div>
+                <div class="form-row">
                     <div class="form-group">
                         <label>Role</label>
                         <select id="learnerRole" required>
@@ -1240,13 +1289,143 @@
                             <option value="admin">Admin</option>
                         </select>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>Temporary Password</label>
-                    <input type="password" id="learnerPassword" required placeholder="Enter temporary password">
+                    <div class="form-group">
+                        <label>Temporary Password</label>
+                        <input type="password" id="learnerPassword" required placeholder="Enter temporary password">
+                    </div>
                 </div>
                 <button type="submit" class="btn">Add Learner</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Edit Learner Modal -->
+    <div id="editLearnerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Edit Learner Details</h2>
+                <button class="close-btn" onclick="closeModal('editLearnerModal')">&times;</button>
+            </div>
+            <form onsubmit="updateLearnerDetails(event)">
+                <input type="hidden" id="editLearnerId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="editLearnerName" required placeholder="Enter full name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="editLearnerEmail" required placeholder="Enter email address">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ID Number</label>
+                        <input type="text" id="editLearnerIdNumber" required placeholder="Enter ID number">
+                    </div>
+                    <div class="form-group">
+                        <label>Department</label>
+                        <select id="editLearnerDepartment">
+                            <option value="">Select department</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Human Resources">Human Resources</option>
+                            <option value="Finance & Accounting">Finance & Accounting</option>
+                            <option value="Marketing & Communications">Marketing & Communications</option>
+                            <option value="Operations & Logistics">Operations & Logistics</option>
+                            <option value="Sales & Business Development">Sales & Business Development</option>
+                            <option value="Customer Service">Customer Service</option>
+                            <option value="Research & Development">Research & Development</option>
+                            <option value="Quality Assurance">Quality Assurance</option>
+                            <option value="Legal & Compliance">Legal & Compliance</option>
+                            <option value="Administration">Administration</option>
+                            <option value="Project Management">Project Management</option>
+                            <option value="Training & Development">Training & Development</option>
+                            <option value="Procurement">Procurement</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Course Name</label>
+                        <input type="text" id="editLearnerCourseName" placeholder="Enter course name">
+                    </div>
+                    <div class="form-group">
+                        <label>Host Company</label>
+                        <input type="text" id="editLearnerHostCompany" placeholder="Enter host company">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select id="editLearnerRole" required>
+                            <option value="">Select role</option>
+                            <option value="intern">Intern</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password (Optional)</label>
+                        <input type="password" id="editLearnerPassword" placeholder="Leave blank to keep current password">
+                    </div>
+                </div>
+                <button type="submit" class="btn">Update Learner</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Export Options Modal -->
+    <div id="exportOptionsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📤 Export Options</h2>
+                <button class="close-btn" onclick="closeModal('exportOptionsModal')">&times;</button>
+            </div>
+            <div class="dashboard-grid">
+                <div class="dashboard-card" onclick="exportLearnerDataExcel()" style="cursor: pointer;">
+                    <h3>📊 Excel Format</h3>
+                    <p>Export learner data as Excel spreadsheet (.xlsx)</p>
+                    <button class="btn btn-success">Export as Excel</button>
+                </div>
+                <div class="dashboard-card" onclick="exportLearnerDataPDF()" style="cursor: pointer;">
+                    <h3>📄 PDF Format</h3>
+                    <p>Export learner data as PDF document</p>
+                    <button class="btn btn-danger">Export as PDF</button>
+                </div>
+                <div class="dashboard-card" onclick="exportLearnerData()" style="cursor: pointer;">
+                    <h3>💾 JSON Format</h3>
+                    <p>Export learner data as JSON file</p>
+                    <button class="btn btn-secondary">Export as JSON</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Export Options Modal -->
+    <div id="reportExportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="reportExportTitle">📊 Export Report</h2>
+                <button class="close-btn" onclick="closeModal('reportExportModal')">&times;</button>
+            </div>
+            <input type="hidden" id="reportType">
+            <div class="dashboard-grid">
+                <div class="dashboard-card" onclick="exportReportPDF()" style="cursor: pointer;">
+                    <h3>📄 PDF Format</h3>
+                    <p>Export report as PDF document</p>
+                    <button class="btn btn-danger">Export as PDF</button>
+                </div>
+                <div class="dashboard-card" onclick="exportReportExcel()" style="cursor: pointer;">
+                    <h3>📊 Excel Format</h3>
+                    <p>Export report as Excel spreadsheet</p>
+                    <button class="btn btn-success">Export as Excel</button>
+                </div>
+                <div class="dashboard-card" onclick="exportReportText()" style="cursor: pointer;">
+                    <h3>📝 Text Format</h3>
+                    <p>Export report as text file</p>
+                    <button class="btn btn-secondary">Export as Text</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1351,10 +1530,13 @@
             
             const name = document.getElementById('registerName').value;
             const email = document.getElementById('registerEmail').value;
+            const idNumber = document.getElementById('registerIdNumber').value;
             const password = document.getElementById('registerPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             const role = document.getElementById('registerRole').value;
             const department = document.getElementById('registerDepartment').value;
+            const courseName = document.getElementById('registerCourseName').value;
+            const hostCompany = document.getElementById('registerHostCompany').value;
             const profilePicFile = document.getElementById('registerProfilePic').files[0];
             
             if (password !== confirmPassword) {
@@ -1390,9 +1572,12 @@
                     id: Date.now().toString(),
                     name,
                     email,
+                    idNumber,
                     password,
                     role,
                     department,
+                    courseName,
+                    hostCompany,
                     profilePicture,
                     registeredDate: new Date().toISOString(),
                     lastActive: new Date().toISOString(),
@@ -1487,7 +1672,10 @@
             
             document.getElementById('profileName').value = currentUser.name || '';
             document.getElementById('profileEmail').value = currentUser.email || '';
+            document.getElementById('profileIdNumber').value = currentUser.idNumber || '';
             document.getElementById('profileDepartment').value = currentUser.department || '';
+            document.getElementById('profileCourseName').value = currentUser.courseName || '';
+            document.getElementById('profileHostCompany').value = currentUser.hostCompany || '';
             
             const preview = document.getElementById('profilePreview');
             if (currentUser.profilePicture) {
@@ -1504,28 +1692,34 @@
             
             const name = document.getElementById('profileName').value;
             const email = document.getElementById('profileEmail').value;
+            const idNumber = document.getElementById('profileIdNumber').value;
             const department = document.getElementById('profileDepartment').value;
+            const courseName = document.getElementById('profileCourseName').value;
+            const hostCompany = document.getElementById('profileHostCompany').value;
             const profilePicFile = document.getElementById('profilePicInput').files[0];
             
             if (profilePicFile) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    updateUserProfile(name, email, department, e.target.result);
+                    updateUserProfile(name, email, idNumber, department, courseName, hostCompany, e.target.result);
                 };
                 reader.readAsDataURL(profilePicFile);
             } else {
-                updateUserProfile(name, email, department, currentUser.profilePicture);
+                updateUserProfile(name, email, idNumber, department, courseName, hostCompany, currentUser.profilePicture);
             }
         }
 
-        function updateUserProfile(name, email, department, profilePicture) {
+        function updateUserProfile(name, email, idNumber, department, courseName, hostCompany, profilePicture) {
             const users = JSON.parse(localStorage.getItem('gwc_users')) || [];
             const userIndex = users.findIndex(u => u.id === currentUser.id);
             
             if (userIndex !== -1) {
                 users[userIndex].name = name;
                 users[userIndex].email = email;
+                users[userIndex].idNumber = idNumber;
                 users[userIndex].department = department;
+                users[userIndex].courseName = courseName;
+                users[userIndex].hostCompany = hostCompany;
                 if (profilePicture) {
                     users[userIndex].profilePicture = profilePicture;
                 }
@@ -1956,7 +2150,10 @@
             
             const name = document.getElementById('learnerName').value;
             const email = document.getElementById('learnerEmail').value;
+            const idNumber = document.getElementById('learnerIdNumber').value;
             const department = document.getElementById('learnerDepartment').value;
+            const courseName = document.getElementById('learnerCourseName').value;
+            const hostCompany = document.getElementById('learnerHostCompany').value;
             const role = document.getElementById('learnerRole').value;
             const password = document.getElementById('learnerPassword').value;
             
@@ -1972,9 +2169,12 @@
                 id: Date.now().toString(),
                 name,
                 email,
+                idNumber,
                 password,
                 role,
                 department,
+                courseName,
+                hostCompany,
                 profilePicture: null,
                 registeredDate: new Date().toISOString(),
                 lastActive: new Date().toISOString(),
@@ -2023,12 +2223,45 @@
             
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const csv = e.target.result;
-                    processImportData(csv);
-                };
-                reader.readAsText(file);
+                const fileName = file.name.toLowerCase();
+                
+                if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+                    // Handle Excel file
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, { type: 'array' });
+                            const sheetName = workbook.SheetNames[0];
+                            const worksheet = workbook.Sheets[sheetName];
+                            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                            
+                            // Map Excel columns to our format
+                            const mappedData = jsonData.map(row => ({
+                                name: row['Full Name'] || row['Name'] || '',
+                                email: row['Email'] || '',
+                                idNumber: row['ID Number'] || row['ID'] || '',
+                                department: row['Department'] || '',
+                                courseName: row['Course Name'] || row['Course'] || '',
+                                hostCompany: row['Host Company'] || row['Company'] || '',
+                                role: row['Role'] || 'intern'
+                            }));
+                            
+                            processImportData(mappedData, true);
+                        } catch (error) {
+                            showNotification('Error reading Excel file. Please check the format.', 'error');
+                        }
+                    };
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    // Handle CSV file
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const csv = e.target.result;
+                        processImportData(csv);
+                    };
+                    reader.readAsText(file);
+                }
             } else if (manualInput.trim()) {
                 processImportData(manualInput);
             } else {
@@ -2036,23 +2269,47 @@
             }
         }
 
-        function processImportData(data) {
-            const lines = data.split('\n').filter(line => line.trim());
+        function processImportData(data, isExcel = false) {
+            let learnerData = [];
+            
+            if (isExcel) {
+                // Process Excel data
+                learnerData = data;
+            } else {
+                // Process CSV/text data
+                const lines = data.split('\n').filter(line => line.trim());
+                lines.forEach(line => {
+                    const [name, email, idNumber, department, courseName, hostCompany, role] = line.split(',').map(item => item.trim());
+                    if (name && email) {
+                        learnerData.push({
+                            name,
+                            email,
+                            idNumber: idNumber || '',
+                            department: department || '',
+                            courseName: courseName || '',
+                            hostCompany: hostCompany || '',
+                            role: role || 'intern'
+                        });
+                    }
+                });
+            }
+            
             const users = JSON.parse(localStorage.getItem('gwc_users')) || [];
             let imported = 0;
             let skipped = 0;
             
-            lines.forEach(line => {
-                const [name, email, department, role] = line.split(',').map(item => item.trim());
-                
-                if (name && email && !users.find(u => u.email === email)) {
+            learnerData.forEach(learnerInfo => {
+                if (learnerInfo.name && learnerInfo.email && !users.find(u => u.email === learnerInfo.email)) {
                     const newUser = {
                         id: Date.now().toString() + Math.random(),
-                        name,
-                        email,
+                        name: learnerInfo.name,
+                        email: learnerInfo.email,
+                        idNumber: learnerInfo.idNumber || '',
                         password: 'temp123',
-                        role: role || 'intern',
-                        department: department || '',
+                        role: learnerInfo.role || 'intern',
+                        department: learnerInfo.department || '',
+                        courseName: learnerInfo.courseName || '',
+                        hostCompany: learnerInfo.hostCompany || '',
                         profilePicture: null,
                         registeredDate: new Date().toISOString(),
                         lastActive: new Date().toISOString(),
@@ -2083,7 +2340,7 @@
             // Reset form
             document.getElementById('importFile').value = '';
             document.getElementById('manualImport').value = '';
-            document.getElementById('importPreview').innerHTML = '📄 Click to upload CSV file<br><small>Format: Name, Email, Department, Role</small>';
+            document.getElementById('importPreview').innerHTML = '📄 Click to upload CSV or Excel file<br><small>Supported formats: CSV, Excel (.xlsx, .xls)</small>';
         }
 
         // Filter functions
@@ -2303,20 +2560,350 @@
             const users = JSON.parse(localStorage.getItem('gwc_users')) || [];
             const learner = users.find(u => u.id === learnerId);
             
-            if (learner) {
-                const newName = prompt('Enter new name:', learner.name);
-                const newDepartment = prompt('Enter new department:', learner.department || '');
-                
-                if (newName !== null) {
-                    const userIndex = users.findIndex(u => u.id === learnerId);
-                    users[userIndex].name = newName;
-                    users[userIndex].department = newDepartment;
-                    
-                    localStorage.setItem('gwc_users', JSON.stringify(users));
-                    loadLearnerTable();
-                    showNotification('Learner updated successfully!', 'success');
-                }
+            if (!learner) {
+                showNotification('Learner not found.', 'error');
+                return;
             }
+            
+            // Populate the edit form
+            document.getElementById('editLearnerId').value = learner.id;
+            document.getElementById('editLearnerName').value = learner.name || '';
+            document.getElementById('editLearnerEmail').value = learner.email || '';
+            document.getElementById('editLearnerIdNumber').value = learner.idNumber || '';
+            document.getElementById('editLearnerDepartment').value = learner.department || '';
+            document.getElementById('editLearnerCourseName').value = learner.courseName || '';
+            document.getElementById('editLearnerHostCompany').value = learner.hostCompany || '';
+            document.getElementById('editLearnerRole').value = learner.role || '';
+            document.getElementById('editLearnerPassword').value = '';
+            
+            openModal('editLearnerModal');
+        }
+
+        function updateLearnerDetails(event) {
+            event.preventDefault();
+            
+            const learnerId = document.getElementById('editLearnerId').value;
+            const name = document.getElementById('editLearnerName').value;
+            const email = document.getElementById('editLearnerEmail').value;
+            const idNumber = document.getElementById('editLearnerIdNumber').value;
+            const department = document.getElementById('editLearnerDepartment').value;
+            const courseName = document.getElementById('editLearnerCourseName').value;
+            const hostCompany = document.getElementById('editLearnerHostCompany').value;
+            const role = document.getElementById('editLearnerRole').value;
+            const newPassword = document.getElementById('editLearnerPassword').value;
+            
+            const users = JSON.parse(localStorage.getItem('gwc_users')) || [];
+            const userIndex = users.findIndex(u => u.id === learnerId);
+            
+            if (userIndex !== -1) {
+                // Check if email is already used by another user
+                const emailExists = users.find(u => u.email === email && u.id !== learnerId);
+                if (emailExists) {
+                    showNotification('Email is already used by another user!', 'error');
+                    return;
+                }
+                
+                users[userIndex].name = name;
+                users[userIndex].email = email;
+                users[userIndex].idNumber = idNumber;
+                users[userIndex].department = department;
+                users[userIndex].courseName = courseName;
+                users[userIndex].hostCompany = hostCompany;
+                users[userIndex].role = role;
+                
+                if (newPassword.trim()) {
+                    users[userIndex].password = newPassword;
+                }
+                
+                users[userIndex].lastModified = new Date().toISOString();
+                
+                localStorage.setItem('gwc_users', JSON.stringify(users));
+                
+                // Update current user if editing own profile
+                if (currentUser && currentUser.id === learnerId) {
+                    currentUser = users[userIndex];
+                    localStorage.setItem('gwc_current_user', JSON.stringify(currentUser));
+                    updateUserInterface();
+                }
+                
+                closeModal('editLearnerModal');
+                loadLearnerTable();
+                loadDashboardData();
+                showNotification('Learner details updated successfully!', 'success');
+            } else {
+                showNotification('Learner not found!', 'error');
+            }
+        }
+
+        // Export functions
+        function showExportOptions() {
+            openModal('exportOptionsModal');
+        }
+
+        function showReportExportOptions(reportType) {
+            document.getElementById('reportType').value = reportType;
+            const titles = {
+                'progress': '📊 Export Progress Report',
+                'engagement': '📈 Export Engagement Report',
+                'completion': '🎯 Export Completion Report'
+            };
+            document.getElementById('reportExportTitle').textContent = titles[reportType] || '📊 Export Report';
+            openModal('reportExportModal');
+        }
+
+        function downloadImportTemplate() {
+            const templateData = [
+                {
+                    'Full Name': 'John Doe',
+                    'Email': 'john.doe@example.com',
+                    'ID Number': 'ID123456',
+                    'Department': 'Information Technology',
+                    'Course Name': 'Management Assistant',
+                    'Host Company': 'ABC Company Ltd',
+                    'Role': 'intern'
+                },
+                {
+                    'Full Name': 'Jane Smith',
+                    'Email': 'jane.smith@example.com',
+                    'ID Number': 'ID789012',
+                    'Department': 'Human Resources',
+                    'Course Name': 'Business Administration',
+                    'Host Company': 'XYZ Corporation',
+                    'Role': 'intern'
+                }
+            ];
+            
+            const ws = XLSX.utils.json_to_sheet(templateData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Learner Import Template');
+            
+            // Set column widths
+            const colWidths = [
+                { wch: 20 }, // Full Name
+                { wch: 25 }, // Email
+                { wch: 15 }, // ID Number
+                { wch: 25 }, // Department
+                { wch: 20 }, // Course Name
+                { wch: 20 }, // Host Company
+                { wch: 10 }  // Role
+            ];
+            ws['!cols'] = colWidths;
+            
+            XLSX.writeFile(wb, 'GWConnect_Learner_Import_Template.xlsx');
+            showNotification('Import template downloaded successfully!', 'success');
+        }
+
+        function exportLearnerDataExcel() {
+            const users = JSON.parse(localStorage.getItem('gwc_users')) || [];
+            const learners = users.filter(u => u.role === 'intern');
+            
+            const exportData = learners.map(learner => ({
+                'Full Name': learner.name,
+                'Email': learner.email,
+                'ID Number': learner.idNumber || 'N/A',
+                'Department': learner.department || 'N/A',
+                'Course Name': learner.courseName || 'N/A',
+                'Host Company': learner.hostCompany || 'N/A',
+                'Registration Date': new Date(learner.registeredDate).toLocaleDateString(),
+                'Last Active': new Date(learner.lastActive).toLocaleDateString(),
+                'Overall Progress': (learner.progress?.overallProgress || 0) + '%',
+                'Completed Components': learner.progress?.completedComponents?.length || 0,
+                'Certificates Earned': learner.progress?.certificates?.length || 0,
+                'Quizzes Completed': Object.keys(learner.progress?.quizScores || {}).length,
+                'Assignments Submitted': Object.keys(learner.progress?.assignments || {}).length
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Learner Data');
+            
+            // Set column widths
+            const colWidths = [
+                { wch: 20 }, { wch: 25 }, { wch: 15 }, { wch: 25 }, { wch: 20 },
+                { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 },
+                { wch: 15 }, { wch: 15 }, { wch: 15 }
+            ];
+            ws['!cols'] = colWidths;
+            
+            XLSX.writeFile(wb, `GWConnect_Learner_Data_${new Date().toISOString().split('T')[0]}.xlsx`);
+            closeModal('exportOptionsModal');
+            showNotification('Learner data exported to Excel successfully!', 'success');
+        }
+
+        function exportLearnerDataPDF() {
+            const users = JSON.parse(localStorage.getItem('gwc_users')) || [];
+            const learners = users.filter(u => u.role === 'intern');
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add title
+            doc.setFontSize(20);
+            doc.text('GWConnect LMS - Learner Data Report', 20, 20);
+            
+            doc.setFontSize(12);
+            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 30);
+            doc.text(`Total Learners: ${learners.length}`, 20, 40);
+            
+            let yPosition = 60;
+            
+            learners.forEach((learner, index) => {
+                if (yPosition > 250) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                
+                doc.setFontSize(14);
+                doc.text(`${index + 1}. ${learner.name}`, 20, yPosition);
+                yPosition += 10;
+                
+                doc.setFontSize(10);
+                doc.text(`Email: ${learner.email}`, 25, yPosition);
+                yPosition += 7;
+                doc.text(`Department: ${learner.department || 'N/A'}`, 25, yPosition);
+                yPosition += 7;
+                doc.text(`Progress: ${learner.progress?.overallProgress || 0}%`, 25, yPosition);
+                yPosition += 7;
+                doc.text(`Certificates: ${learner.progress?.certificates?.length || 0}`, 25, yPosition);
+                yPosition += 15;
+            });
+            
+            doc.save(`GWConnect_Learner_Data_${new Date().toISOString().split('T')[0]}.pdf`);
+            closeModal('exportOptionsModal');
+            showNotification('Learner data exported to PDF successfully!', 'success');
+        }
+
+        function exportReportPDF() {
+            const reportType = document.getElementById('reportType').value;
+            const reportData = generateReportData(reportType);
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add title
+            doc.setFontSize(20);
+            doc.text(reportData.title, 20, 20);
+            
+            doc.setFontSize(12);
+            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 30);
+            
+            // Add content
+            const lines = reportData.content.split('\n');
+            let yPosition = 50;
+            
+            lines.forEach(line => {
+                if (yPosition > 270) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                
+                if (line.includes('=')) {
+                    doc.setFontSize(14);
+                } else if (line.includes(':')) {
+                    doc.setFontSize(10);
+                } else {
+                    doc.setFontSize(12);
+                }
+                
+                doc.text(line, 20, yPosition);
+                yPosition += 8;
+            });
+            
+            doc.save(`${reportData.filename}.pdf`);
+            closeModal('reportExportModal');
+            showNotification('Report exported to PDF successfully!', 'success');
+        }
+
+        function exportReportExcel() {
+            const reportType = document.getElementById('reportType').value;
+            const reportData = generateReportData(reportType);
+            
+            const users = JSON.parse(localStorage.getItem('gwc_users')) || [];
+            const learners = users.filter(u => u.role === 'intern');
+            
+            let exportData = [];
+            
+            if (reportType === 'progress') {
+                exportData = learners.map(learner => ({
+                    'Name': learner.name,
+                    'Department': learner.department || 'N/A',
+                    'Overall Progress': (learner.progress?.overallProgress || 0) + '%',
+                    'Completed Components': learner.progress?.completedComponents?.length || 0,
+                    'Last Active': new Date(learner.lastActive).toLocaleDateString()
+                }));
+            } else if (reportType === 'engagement') {
+                exportData = learners.map(learner => ({
+                    'Name': learner.name,
+                    'Department': learner.department || 'N/A',
+                    'Quizzes Completed': Object.keys(learner.progress?.quizScores || {}).length,
+                    'Assignments Submitted': Object.keys(learner.progress?.assignments || {}).length,
+                    'Last Active': new Date(learner.lastActive).toLocaleDateString(),
+                    'Registration Date': new Date(learner.registeredDate).toLocaleDateString()
+                }));
+            } else if (reportType === 'completion') {
+                exportData = learners.map(learner => ({
+                    'Name': learner.name,
+                    'Department': learner.department || 'N/A',
+                    'Overall Progress': (learner.progress?.overallProgress || 0) + '%',
+                    'Certificates Earned': learner.progress?.certificates?.length || 0,
+                    'Completion Status': (learner.progress?.overallProgress || 0) === 100 ? 'Completed' : 'In Progress'
+                }));
+            }
+            
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, reportData.title);
+            
+            XLSX.writeFile(wb, `${reportData.filename}.xlsx`);
+            closeModal('reportExportModal');
+            showNotification('Report exported to Excel successfully!', 'success');
+        }
+
+        function exportReportText() {
+            const reportType = document.getElementById('reportType').value;
+            const reportData = generateReportData(reportType);
+            
+            const dataBlob = new Blob([reportData.content], { type: 'text/plain' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${reportData.filename}.txt`;
+            link.click();
+            
+            closeModal('reportExportModal');
+            showNotification('Report exported to text file successfully!', 'success');
+        }
+
+        function generateReportData(reportType) {
+            const users = JSON.parse(localStorage.getItem('gwc_users')) || [];
+            const courses = JSON.parse(localStorage.getItem('gwc_courses')) || [];
+            const learners = users.filter(u => u.role === 'intern');
+            
+            let title, content, filename;
+            
+            switch (reportType) {
+                case 'progress':
+                    title = 'Progress Report';
+                    filename = `Progress_Report_${new Date().toISOString().split('T')[0]}`;
+                    content = generateProgressReportContent(learners, courses);
+                    break;
+                case 'engagement':
+                    title = 'Engagement Report';
+                    filename = `Engagement_Report_${new Date().toISOString().split('T')[0]}`;
+                    content = generateEngagementReportContent(learners, courses);
+                    break;
+                case 'completion':
+                    title = 'Completion Report';
+                    filename = `Completion_Report_${new Date().toISOString().split('T')[0]}`;
+                    content = generateCompletionReportContent(learners, courses);
+                    break;
+                default:
+                    title = 'Report';
+                    filename = `Report_${new Date().toISOString().split('T')[0]}`;
+                    content = 'No data available';
+            }
+            
+            return { title, content, filename };
         }
 
         function deleteLearner(learnerId) {
@@ -3424,7 +4011,7 @@ IMPORTANT SECURITY NOTES:
 ═══════════════════════════════════════
 
 If you need assistance:
-• Email: support@graduateworldconnect.com
+• Email: musa.vukeya@gwconnect.org
 • Phone: +1 (555) 123-4567
 • Help Desk: Available 24/7
 
@@ -3574,7 +4161,7 @@ IMPORTANT SECURITY NOTES:
 ═══════════════════════════════════════
 
 If you need assistance:
-• Email: support@graduateworldconnect.com
+• Email: musa.vukeya@gwconnect.org
 • Phone: +1 (555) 123-4567
 • Help Desk: Available 24/7
 
@@ -3747,10 +4334,7 @@ This is an automated message. Please do not reply to this email.`;
             showNotification('Complete report exported successfully!', 'success');
         }
 
-        function generateProgressReport() {
-            const users = JSON.parse(localStorage.getItem('gwc_users')) || [];
-            const learners = users.filter(u => u.role === 'intern');
-            
+        function generateProgressReportContent(learners, courses) {
             let report = 'Progress Report\n';
             report += '================\n\n';
             report += `Generated: ${new Date().toLocaleDateString()}\n\n`;
@@ -3761,21 +4345,10 @@ This is an automated message. Please do not reply to this email.`;
                 report += `${learner.name} (${learner.department || 'N/A'}): ${progress}% - ${completed} components\n`;
             });
             
-            const dataBlob = new Blob([report], { type: 'text/plain' });
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'progress_report.txt';
-            link.click();
-            
-            showNotification('Progress report generated!', 'success');
+            return report;
         }
 
-        function generateEngagementReport() {
-            const users = JSON.parse(localStorage.getItem('gwc_users')) || [];
-            const courses = JSON.parse(localStorage.getItem('gwc_courses')) || [];
-            const learners = users.filter(u => u.role === 'intern');
-            
+        function generateEngagementReportContent(learners, courses) {
             let report = 'Engagement Report\n';
             report += '==================\n\n';
             report += `Generated: ${new Date().toLocaleDateString()}\n\n`;
@@ -3801,36 +4374,10 @@ This is an automated message. Please do not reply to this email.`;
                 report += `  - Last Active: ${lastActive}\n\n`;
             });
             
-            report += 'COURSE ENGAGEMENT:\n';
-            report += '------------------\n';
-            
-            courses.forEach(course => {
-                const enrolledLearners = learners.length;
-                const activeLearners = learners.filter(l => l.progress?.moduleProgress?.[course.id] > 0).length;
-                const completedLearners = learners.filter(l => l.progress?.moduleProgress?.[course.id] === 100).length;
-                
-                report += `${course.title}:\n`;
-                report += `  - Enrolled: ${enrolledLearners}\n`;
-                report += `  - Active: ${activeLearners}\n`;
-                report += `  - Completed: ${completedLearners}\n`;
-                report += `  - Engagement Rate: ${enrolledLearners > 0 ? Math.round((activeLearners / enrolledLearners) * 100) : 0}%\n\n`;
-            });
-            
-            const dataBlob = new Blob([report], { type: 'text/plain' });
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'engagement_report.txt';
-            link.click();
-            
-            showNotification('Engagement report generated and downloaded!', 'success');
+            return report;
         }
 
-        function generateCompletionReport() {
-            const users = JSON.parse(localStorage.getItem('gwc_users')) || [];
-            const courses = JSON.parse(localStorage.getItem('gwc_courses')) || [];
-            const learners = users.filter(u => u.role === 'intern');
-            
+        function generateCompletionReportContent(learners, courses) {
             let report = 'Completion Report\n';
             report += '=================\n\n';
             report += `Generated: ${new Date().toLocaleDateString()}\n\n`;
@@ -3848,78 +4395,19 @@ This is an automated message. Please do not reply to this email.`;
             report += `Fully Completed: ${completedLearners} (${Math.round((completedLearners / Math.max(totalLearners, 1)) * 100)}%)\n`;
             report += `Certificates Issued: ${totalCertificates}\n\n`;
             
-            report += 'COMPLETION BY DEPARTMENT:\n';
-            report += '------------------------\n';
-            
-            const deptStats = {};
-            learners.forEach(learner => {
-                const dept = learner.department || 'N/A';
-                if (!deptStats[dept]) {
-                    deptStats[dept] = { total: 0, avgProgress: 0, completed: 0 };
-                }
-                deptStats[dept].total++;
-                deptStats[dept].avgProgress += learner.progress?.overallProgress || 0;
-                if ((learner.progress?.overallProgress || 0) === 100) {
-                    deptStats[dept].completed++;
-                }
-            });
-            
-            Object.keys(deptStats).forEach(dept => {
-                const stats = deptStats[dept];
-                stats.avgProgress = Math.round(stats.avgProgress / stats.total);
-                
-                report += `${dept}:\n`;
-                report += `  - Total Learners: ${stats.total}\n`;
-                report += `  - Average Progress: ${stats.avgProgress}%\n`;
-                report += `  - Completed: ${stats.completed} (${Math.round((stats.completed / stats.total) * 100)}%)\n\n`;
-            });
-            
-            report += 'COURSE COMPLETION DETAILS:\n';
-            report += '--------------------------\n';
-            
-            courses.forEach(course => {
-                const courseStats = {
-                    enrolled: learners.length,
-                    started: learners.filter(l => l.progress?.moduleProgress?.[course.id] > 0).length,
-                    completed: learners.filter(l => l.progress?.moduleProgress?.[course.id] === 100).length
-                };
-                
-                report += `${course.title}:\n`;
-                report += `  - Enrolled: ${courseStats.enrolled}\n`;
-                report += `  - Started: ${courseStats.started} (${Math.round((courseStats.started / Math.max(courseStats.enrolled, 1)) * 100)}%)\n`;
-                report += `  - Completed: ${courseStats.completed} (${Math.round((courseStats.completed / Math.max(courseStats.enrolled, 1)) * 100)}%)\n\n`;
-            });
-            
-            report += 'INDIVIDUAL LEARNER PROGRESS:\n';
-            report += '----------------------------\n';
-            
-            learners.forEach(learner => {
-                const progress = learner.progress || {};
-                const certificates = progress.certificates?.length || 0;
-                
-                report += `${learner.name} (${learner.department || 'N/A'}):\n`;
-                report += `  - Overall Progress: ${progress.overallProgress || 0}%\n`;
-                report += `  - Components Completed: ${progress.completedComponents?.length || 0}\n`;
-                report += `  - Certificates Earned: ${certificates}\n`;
-                
-                courses.forEach(course => {
-                    const courseProgress = progress.moduleProgress?.[course.id] || 0;
-                    if (courseProgress > 0) {
-                        report += `  - ${course.title}: ${courseProgress}%\n`;
-                    }
-                });
-                
-                report += '\n';
-            });
-            
-            const dataBlob = new Blob([report], { type: 'text/plain' });
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'completion_report.txt';
-            link.click();
-            
-            showNotification('Completion report generated and downloaded!', 'success');
+            return report;
+        }
+
+        function generateProgressReport() {
+            showReportExportOptions('progress');
+        }
+
+        function generateEngagementReport() {
+            showReportExportOptions('engagement');
+        }
+
+        function generateCompletionReport() {
+            showReportExportOptions('completion');
         }
 
         function generateCustomReport() {
@@ -4990,5 +5478,5 @@ Generated: ${new Date().toLocaleString()}
             });
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96e8006df59b8a59',t:'MTc1NTA4NTg5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96e83403c67e0d06',t:'MTc1NTA4ODAxMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
