@@ -1992,8 +1992,11 @@
             users.push(newUser);
             localStorage.setItem('gwc_users', JSON.stringify(users));
             
+            // Generate and display login credentials
+            generateLoginCredentials(newUser);
+            
             closeModal('addLearnerModal');
-            showNotification('Learner added successfully!', 'success');
+            showNotification('Learner added successfully! Login credentials generated.', 'success');
             loadLearnerTable();
             loadDashboardData();
             
@@ -2121,14 +2124,178 @@
             const users = JSON.parse(localStorage.getItem('gwc_users')) || [];
             const learner = users.find(u => u.id === learnerId);
             
-            if (learner) {
-                const progress = learner.progress || {};
-                const completedComponents = progress.completedComponents?.length || 0;
-                const certificates = progress.certificates?.length || 0;
-                const quizCount = Object.keys(progress.quizScores || {}).length;
-                const assignmentCount = Object.keys(progress.assignments || {}).length;
+            if (!learner) {
+                showNotification('Learner not found.', 'error');
+                return;
+            }
+            
+            const progress = learner.progress || {};
+            const completedComponents = progress.completedComponents?.length || 0;
+            const certificates = progress.certificates?.length || 0;
+            const quizCount = Object.keys(progress.quizScores || {}).length;
+            const assignmentCount = Object.keys(progress.assignments || {}).length;
+            const courses = JSON.parse(localStorage.getItem('gwc_courses')) || [];
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.id = 'viewLearnerModal';
+            modal.style.display = 'block';
+            
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 1000px;">
+                    <div class="modal-header">
+                        <h2>👤 Learner Profile: ${learner.name}</h2>
+                        <button class="close-btn" onclick="closeViewLearnerModal()">&times;</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px;">
+                        <!-- Left Column - Basic Info -->
+                        <div>
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                ${learner.profilePicture ? 
+                                    `<img src="${learner.profilePicture}" alt="Profile" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #1a4d3a;">` :
+                                    `<div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(45deg, #1a4d3a, #2d5a3d); color: #ffd700; display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: bold; margin: 0 auto; border: 4px solid #ffd700;">${learner.name.charAt(0)}</div>`
+                                }
+                                <h3 style="margin: 15px 0 5px 0; color: #2d3748;">${learner.name}</h3>
+                                <p style="color: #718096; margin-bottom: 20px;">${learner.email}</p>
+                            </div>
+                            
+                            <div class="dashboard-card" style="margin-bottom: 20px;">
+                                <h4 style="margin-bottom: 15px; color: #2d3748;">📋 Basic Information</h4>
+                                <div style="space-y: 10px;">
+                                    <p><strong>Department:</strong> ${learner.department || 'Not specified'}</p>
+                                    <p><strong>Role:</strong> ${learner.role.charAt(0).toUpperCase() + learner.role.slice(1)}</p>
+                                    <p><strong>Registered:</strong> ${new Date(learner.registeredDate).toLocaleDateString()}</p>
+                                    <p><strong>Last Active:</strong> ${new Date(learner.lastActive).toLocaleDateString()}</p>
+                                    <p><strong>User ID:</strong> ${learner.id}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="dashboard-card">
+                                <h4 style="margin-bottom: 15px; color: #2d3748;">📊 Quick Stats</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: center;">
+                                    <div>
+                                        <div class="stat-number" style="font-size: 24px;">${progress.overallProgress || 0}%</div>
+                                        <div class="stat-label">Overall Progress</div>
+                                    </div>
+                                    <div>
+                                        <div class="stat-number" style="font-size: 24px;">${certificates}</div>
+                                        <div class="stat-label">Certificates</div>
+                                    </div>
+                                    <div>
+                                        <div class="stat-number" style="font-size: 24px;">${quizCount}</div>
+                                        <div class="stat-label">Quizzes</div>
+                                    </div>
+                                    <div>
+                                        <div class="stat-number" style="font-size: 24px;">${assignmentCount}</div>
+                                        <div class="stat-label">Assignments</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column - Detailed Progress -->
+                        <div>
+                            <div class="dashboard-card" style="margin-bottom: 20px;">
+                                <h4 style="margin-bottom: 15px; color: #2d3748;">📈 Course Progress</h4>
+                                ${courses.map(course => {
+                                    const courseProgress = progress.moduleProgress?.[course.id] || 0;
+                                    const status = courseProgress === 100 ? 'Completed' : courseProgress > 0 ? 'In Progress' : 'Not Started';
+                                    const statusColor = courseProgress === 100 ? '#4ade80' : courseProgress > 0 ? '#ffd700' : '#d1d5db';
+                                    
+                                    return `
+                                        <div style="margin-bottom: 15px; padding: 15px; background: #f7fafc; border-radius: 8px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                                <span style="font-weight: 600;">${course.icon} ${course.title}</span>
+                                                <span style="color: ${statusColor}; font-weight: 600;">${status}</span>
+                                            </div>
+                                            <div class="progress-bar" style="margin-bottom: 5px;">
+                                                <div class="progress-fill" style="width: ${courseProgress}%; background: ${statusColor};"></div>
+                                            </div>
+                                            <small style="color: #718096;">${courseProgress}% Complete</small>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                            
+                            ${Object.keys(progress.quizScores || {}).length > 0 ? `
+                                <div class="dashboard-card" style="margin-bottom: 20px;">
+                                    <h4 style="margin-bottom: 15px; color: #2d3748;">🎯 Quiz Performance</h4>
+                                    ${Object.entries(progress.quizScores || {}).map(([key, score]) => {
+                                        const [courseId] = key.split('_');
+                                        const course = courses.find(c => c.id === courseId);
+                                        const courseName = course ? course.title : 'Unknown Course';
+                                        const scoreColor = score >= 80 ? '#4ade80' : score >= 70 ? '#ffd700' : '#ef4444';
+                                        
+                                        return `
+                                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                                                <span>${courseName}</span>
+                                                <span style="color: ${scoreColor}; font-weight: 600;">${score}%</span>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            ` : ''}
+                            
+                            ${certificates > 0 ? `
+                                <div class="dashboard-card">
+                                    <h4 style="margin-bottom: 15px; color: #2d3748;">🏆 Certificates Earned</h4>
+                                    ${progress.certificates.map(cert => `
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f0fff4; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #4ade80;">
+                                            <div>
+                                                <div style="font-weight: 600;">${cert.courseTitle}</div>
+                                                <small style="color: #718096;">Issued: ${cert.issueDate}</small>
+                                            </div>
+                                            <button class="btn btn-secondary btn-small" onclick="viewCertificate('${cert.id}', '${learner.id}')">View</button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #e2e8f0; display: flex; gap: 15px; justify-content: center;">
+                        <button class="btn btn-secondary" onclick="editLearner('${learner.id}')">✏️ Edit Learner</button>
+                        <button class="btn btn-warning" onclick="resetLearnerProgress('${learner.id}')">🔄 Reset Progress</button>
+                        <button class="btn btn-success" onclick="sendCredentialsEmail('${learner.id}')">📧 Send Credentials</button>
+                        <button class="btn btn-danger" onclick="deleteLearner('${learner.id}')">🗑️ Delete Learner</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function closeViewLearnerModal() {
+            const modal = document.getElementById('viewLearnerModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function resetLearnerProgress(learnerId) {
+            if (confirm('Are you sure you want to reset all progress for this learner? This action cannot be undone.')) {
+                const users = JSON.parse(localStorage.getItem('gwc_users')) || [];
+                const userIndex = users.findIndex(u => u.id === learnerId);
                 
-                alert(`Learner Details:\n\nName: ${learner.name}\nEmail: ${learner.email}\nDepartment: ${learner.department || 'N/A'}\nRegistered: ${new Date(learner.registeredDate).toLocaleDateString()}\nLast Active: ${new Date(learner.lastActive).toLocaleDateString()}\n\nProgress:\n- Overall: ${progress.overallProgress || 0}%\n- Components Completed: ${completedComponents}\n- Quizzes Taken: ${quizCount}\n- Assignments Submitted: ${assignmentCount}\n- Certificates Earned: ${certificates}`);
+                if (userIndex !== -1) {
+                    users[userIndex].progress = {
+                        completedComponents: [],
+                        moduleProgress: {},
+                        overallProgress: 0,
+                        quizScores: {},
+                        assignments: {},
+                        certificates: [],
+                        logbookEvidence: []
+                    };
+                    
+                    localStorage.setItem('gwc_users', JSON.stringify(users));
+                    
+                    showNotification('Learner progress reset successfully!', 'success');
+                    closeViewLearnerModal();
+                    loadLearnerTable();
+                    loadDashboardData();
+                }
             }
         }
 
@@ -3205,6 +3372,315 @@
                 loadAdminCourses();
                 loadDashboardData();
                 showNotification('Course deleted successfully!', 'success');
+            }
+        }
+
+        // Credentials and email functions
+        function generateLoginCredentials(learner) {
+            const credentialsModal = document.createElement('div');
+            credentialsModal.className = 'modal';
+            credentialsModal.id = 'credentialsModal';
+            credentialsModal.style.display = 'block';
+            
+            const loginUrl = window.location.origin + window.location.pathname;
+            
+            const emailContent = `
+Subject: Welcome to GWConnect LMS - Your Login Credentials
+
+Dear ${learner.name},
+
+Welcome to the Graduate World Connect Learning Management System (GWConnect LMS)!
+
+Your account has been successfully created. Please find your login credentials below:
+
+═══════════════════════════════════════
+🔐 LOGIN CREDENTIALS
+═══════════════════════════════════════
+
+Portal URL: ${loginUrl}
+Email: ${learner.email}
+Temporary Password: ${learner.password}
+Role: ${learner.role.charAt(0).toUpperCase() + learner.role.slice(1)}
+Department: ${learner.department || 'Not specified'}
+
+═══════════════════════════════════════
+📚 GETTING STARTED
+═══════════════════════════════════════
+
+1. Visit the portal URL above
+2. Click on "Login" tab
+3. Enter your email and temporary password
+4. Select your role from the dropdown
+5. Click "Login" to access your dashboard
+
+IMPORTANT SECURITY NOTES:
+• Please change your password after first login
+• Keep your credentials secure and confidential
+• Do not share your login details with others
+• Contact support if you experience any issues
+
+═══════════════════════════════════════
+📞 SUPPORT INFORMATION
+═══════════════════════════════════════
+
+If you need assistance:
+• Email: support@graduateworldconnect.com
+• Phone: +1 (555) 123-4567
+• Help Desk: Available 24/7
+
+═══════════════════════════════════════
+
+We're excited to have you join our learning community!
+
+Best regards,
+Graduate World Connect Team
+Learning & Development Department
+
+This is an automated message. Please do not reply to this email.
+            `.trim();
+            
+            credentialsModal.innerHTML = `
+                <div class="modal-content" style="max-width: 800px;">
+                    <div class="modal-header">
+                        <h2>📧 Login Credentials Generated</h2>
+                        <button class="close-btn" onclick="closeCredentialsModal()">&times;</button>
+                    </div>
+                    
+                    <div style="background: #f0fff4; border: 2px solid #4ade80; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                        <h3 style="color: #166534; margin-bottom: 15px;">✅ Account Created Successfully!</h3>
+                        <p style="color: #166534;">Login credentials have been generated for <strong>${learner.name}</strong>.</p>
+                    </div>
+                    
+                    <div class="dashboard-card" style="margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 15px;">🔐 Login Details</h4>
+                        <div style="background: #f7fafc; padding: 15px; border-radius: 8px; font-family: monospace;">
+                            <p><strong>Portal URL:</strong> ${loginUrl}</p>
+                            <p><strong>Email:</strong> ${learner.email}</p>
+                            <p><strong>Password:</strong> ${learner.password}</p>
+                            <p><strong>Role:</strong> ${learner.role.charAt(0).toUpperCase() + learner.role.slice(1)}</p>
+                            <p><strong>Department:</strong> ${learner.department || 'Not specified'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h4 style="margin-bottom: 15px;">📧 Email Content</h4>
+                        <textarea readonly style="width: 100%; height: 300px; font-family: monospace; font-size: 12px; border: 1px solid #e2e8f0; border-radius: 4px; padding: 10px; background: #f9fafb;">${emailContent}</textarea>
+                    </div>
+                    
+                    <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center;">
+                        <button class="btn btn-success" onclick="copyCredentialsToClipboard('${learner.email}', '${learner.password}', '${loginUrl}')">
+                            📋 Copy Credentials
+                        </button>
+                        <button class="btn btn-warning" onclick="downloadCredentialsEmail('${learner.id}')">
+                            📥 Download Email
+                        </button>
+                        <button class="btn btn-secondary" onclick="sendCredentialsEmail('${learner.id}')">
+                            📧 Send Email (Demo)
+                        </button>
+                        <button class="btn btn-secondary" onclick="closeCredentialsModal()">
+                            ✓ Done
+                        </button>
+                    </div>
+                    
+                    <div style="margin-top: 15px; padding: 15px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <p style="color: #92400e; font-size: 14px; margin: 0;">
+                            <strong>⚠️ Important:</strong> Please securely share these credentials with the learner. 
+                            In a production environment, this would be sent via secure email automatically.
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(credentialsModal);
+        }
+        
+        function closeCredentialsModal() {
+            const modal = document.getElementById('credentialsModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function copyCredentialsToClipboard(email, password, url) {
+            const credentialsText = `GWConnect LMS Login Credentials:
+            
+Portal URL: ${url}
+Email: ${email}
+Password: ${password}
+
+Please change your password after first login.`;
+            
+            navigator.clipboard.writeText(credentialsText).then(() => {
+                showNotification('Credentials copied to clipboard!', 'success');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = credentialsText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showNotification('Credentials copied to clipboard!', 'success');
+            });
+        }
+        
+        function downloadCredentialsEmail(learnerId) {
+            const users = JSON.parse(localStorage.getItem('gwc_users')) || [];
+            const learner = users.find(u => u.id === learnerId);
+            
+            if (!learner) {
+                showNotification('Learner not found.', 'error');
+                return;
+            }
+            
+            const loginUrl = window.location.origin + window.location.pathname;
+            
+            const emailContent = `Subject: Welcome to GWConnect LMS - Your Login Credentials
+
+Dear ${learner.name},
+
+Welcome to the Graduate World Connect Learning Management System (GWConnect LMS)!
+
+Your account has been successfully created. Please find your login credentials below:
+
+═══════════════════════════════════════
+🔐 LOGIN CREDENTIALS
+═══════════════════════════════════════
+
+Portal URL: ${loginUrl}
+Email: ${learner.email}
+Temporary Password: ${learner.password}
+Role: ${learner.role.charAt(0).toUpperCase() + learner.role.slice(1)}
+Department: ${learner.department || 'Not specified'}
+
+═══════════════════════════════════════
+📚 GETTING STARTED
+═══════════════════════════════════════
+
+1. Visit the portal URL above
+2. Click on "Login" tab
+3. Enter your email and temporary password
+4. Select your role from the dropdown
+5. Click "Login" to access your dashboard
+
+IMPORTANT SECURITY NOTES:
+• Please change your password after first login
+• Keep your credentials secure and confidential
+• Do not share your login details with others
+• Contact support if you experience any issues
+
+═══════════════════════════════════════
+📞 SUPPORT INFORMATION
+═══════════════════════════════════════
+
+If you need assistance:
+• Email: support@graduateworldconnect.com
+• Phone: +1 (555) 123-4567
+• Help Desk: Available 24/7
+
+═══════════════════════════════════════
+
+We're excited to have you join our learning community!
+
+Best regards,
+Graduate World Connect Team
+Learning & Development Department
+
+Generated: ${new Date().toLocaleString()}
+Account ID: ${learner.id}
+
+This is an automated message. Please do not reply to this email.`;
+            
+            const dataBlob = new Blob([emailContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `GWConnect_Credentials_${learner.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.txt`;
+            link.click();
+            
+            showNotification('Credentials email downloaded successfully!', 'success');
+        }
+        
+        function sendCredentialsEmail(learnerId) {
+            const users = JSON.parse(localStorage.getItem('gwc_users')) || [];
+            const learner = users.find(u => u.id === learnerId);
+            
+            if (!learner) {
+                showNotification('Learner not found.', 'error');
+                return;
+            }
+            
+            // In a real application, this would send an actual email
+            // For demo purposes, we'll show a simulation
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.id = 'emailSentModal';
+            modal.style.display = 'block';
+            
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h2>📧 Email Sent Successfully</h2>
+                        <button class="close-btn" onclick="closeEmailSentModal()">&times;</button>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 30px;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
+                        <h3 style="color: #166534; margin-bottom: 15px;">Email Delivered!</h3>
+                        <p style="color: #374151; margin-bottom: 20px;">
+                            Login credentials have been sent to:<br>
+                            <strong>${learner.email}</strong>
+                        </p>
+                        
+                        <div style="background: #f0fff4; border: 1px solid #4ade80; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                            <p style="color: #166534; font-size: 14px; margin: 0;">
+                                📨 <strong>Email Details:</strong><br>
+                                Subject: Welcome to GWConnect LMS - Your Login Credentials<br>
+                                Sent: ${new Date().toLocaleString()}<br>
+                                Status: Delivered
+                            </p>
+                        </div>
+                        
+                        <p style="color: #6b7280; font-size: 14px; margin-bottom: 20px;">
+                            The learner should receive the email within a few minutes. 
+                            Please ask them to check their spam folder if they don't see it.
+                        </p>
+                        
+                        <button class="btn" onclick="closeEmailSentModal()">Close</button>
+                    </div>
+                    
+                    <div style="background: #fef3c7; border-radius: 8px; padding: 15px; margin-top: 20px;">
+                        <p style="color: #92400e; font-size: 12px; margin: 0; text-align: center;">
+                            <strong>Demo Note:</strong> This is a simulation. In a production environment, 
+                            the email would be sent through a real email service provider.
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Log the email sending activity
+            const emailLog = {
+                learnerId: learner.id,
+                learnerName: learner.name,
+                learnerEmail: learner.email,
+                sentBy: currentUser.name,
+                sentDate: new Date().toISOString(),
+                type: 'credentials'
+            };
+            
+            const emailLogs = JSON.parse(localStorage.getItem('gwc_email_logs')) || [];
+            emailLogs.push(emailLog);
+            localStorage.setItem('gwc_email_logs', JSON.stringify(emailLogs));
+            
+            showNotification(`Credentials email sent to ${learner.name}!`, 'success');
+        }
+        
+        function closeEmailSentModal() {
+            const modal = document.getElementById('emailSentModal');
+            if (modal) {
+                modal.remove();
             }
         }
 
@@ -4514,5 +4990,5 @@ Generated: ${new Date().toLocaleString()}
             });
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96e77af9e5e573da',t:'MTc1NTA4MDQzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96e8006df59b8a59',t:'MTc1NTA4NTg5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
